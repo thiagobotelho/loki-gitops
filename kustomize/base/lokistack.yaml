@@ -1,10 +1,10 @@
 apiVersion: loki.grafana.com/v1
 kind: LokiStack
 metadata:
-  name: lokistack
+  name: loki
   namespace: openshift-logging
   annotations:
-    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-wave: "10"
 spec:
   size: 1x.small
   storageClassName: crc-csi-hostpath-provisioner
@@ -12,7 +12,6 @@ spec:
     schemas:
       - version: v13
         effectiveDate: "2024-01-01"
-    secret:
-      name: loki-storage-secret
+    storageClassName: crc-csi-hostpath-provisioner
   tenants:
     mode: openshift-logging
