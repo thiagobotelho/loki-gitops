@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: minio-create-bucket
+  namespace: openshift-logging
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: mc
+          image: quay.io/minio/mc:RELEASE.2025-01-17T23-26-28Z
+          env:
+            - name: MINIO_ROOT_USER
+              value: "minio"
+            - name: MINIO_ROOT_PASSWORD
+              value: "minio12345"
+          command: ["/bin/sh","-lc"]
+          args:
+            - |
+              mc alias set local http://minio.openshift-logging.svc:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"
+              mc mb -p local/loki || true
+              mc ls local/loki
