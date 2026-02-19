@@ -5,8 +5,10 @@ metadata:
   namespace: openshift-logging
   annotations:
     argocd.argoproj.io/sync-wave: "20"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   size: 1x.small
+  storageClassName: crc-csi-hostpath-provisioner
   storage:
     secret:
       name: loki-s3
