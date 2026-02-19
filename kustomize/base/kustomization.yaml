@@ -2,8 +2,14 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - namespace-openshift-operators-redhat.yaml
-  - namespace-openshift-logging.yaml
+  - namespaces.yaml
   - operatorgroup.yaml
   - subscription.yaml
-  - lokistack.yaml
+
+  - minio/pvc.yaml
+  - minio/deployment.yaml
+  - minio/service.yaml
+  - minio/bucket-job.yaml
+
+  - loki/s3-secret.yaml
+  - loki/lokistack.yaml
