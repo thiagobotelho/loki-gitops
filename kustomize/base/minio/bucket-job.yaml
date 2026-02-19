@@ -6,20 +6,27 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "8"
 spec:
+  backoffLimit: 6
   template:
     spec:
       restartPolicy: OnFailure
       containers:
         - name: mc
-          image: quay.io/minio/mc:RELEASE.2025-01-17T23-26-28Z
+          image: quay.io/minio/mc:latest
+          imagePullPolicy: IfNotPresent
           env:
             - name: MINIO_ROOT_USER
               value: "minio"
             - name: MINIO_ROOT_PASSWORD
               value: "minio12345"
+            - name: HOME
+              value: /tmp
+            - name: MC_CONFIG_DIR
+              value: /tmp/.mc
           command: ["/bin/sh","-lc"]
           args:
             - |
+              set -e
               mc alias set local http://minio.openshift-logging.svc:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"
               mc mb -p local/loki || true
               mc ls local/loki
