@@ -12,13 +12,19 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: mc
-          image: quay.io/minio/mc:latest
+          image: quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z
           imagePullPolicy: IfNotPresent
           env:
             - name: MINIO_ROOT_USER
-              value: "minio"
+              valueFrom:
+                secretKeyRef:
+                  name: minio-credentials
+                  key: root-user
             - name: MINIO_ROOT_PASSWORD
-              value: "minio12345"
+              valueFrom:
+                secretKeyRef:
+                  name: minio-credentials
+                  key: root-password
             - name: HOME
               value: /tmp
             - name: MC_CONFIG_DIR
@@ -34,3 +40,10 @@ spec:
               mc alias set local http://minio.openshift-logging.svc:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"
               mc mb -p local/loki || true
               mc ls local/loki
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault

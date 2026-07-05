@@ -12,5 +12,4 @@ resources:
   - minio/service.yaml
   - minio/bucket-job.yaml
 
-  - loki/s3-secret.yaml
   - loki/lokistack.yaml

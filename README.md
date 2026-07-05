@@ -45,4 +45,23 @@ loki-gitops/
 ## 🚀 Deploy Manual
 
 ```bash
+export MINIO_ROOT_USER=minio
+export MINIO_ROOT_PASSWORD='use-a-random-password'
+
+oc -n openshift-logging create secret generic minio-credentials \
+  --from-literal=root-user="$MINIO_ROOT_USER" \
+  --from-literal=root-password="$MINIO_ROOT_PASSWORD"
+
+oc -n openshift-logging create secret generic loki-s3 \
+  --from-literal=access_key_id="$MINIO_ROOT_USER" \
+  --from-literal=access_key_secret="$MINIO_ROOT_PASSWORD" \
+  --from-literal=bucketnames=loki \
+  --from-literal=endpoint=http://minio.openshift-logging.svc:9000 \
+  --from-literal=region=us-east-1
+
 oc apply -k kustomize/overlays/crc
+```
+
+Os Secrets não são versionados. Para ambientes compartilhados, prefira
+External Secrets ou Sealed Secrets e rotacione qualquer credencial que já
+tenha sido publicada no histórico Git.
