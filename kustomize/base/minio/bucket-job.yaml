@@ -5,6 +5,7 @@ metadata:
   namespace: openshift-logging
   annotations:
     argocd.argoproj.io/sync-wave: "8"
+    argocd.argoproj.io/sync-options: Force=true,Replace=true
 spec:
   backoffLimit: 6
   template:
@@ -33,11 +34,10 @@ spec:
           args:
             - |
               set -e
-              until wget -qO- http://minio.openshift-logging.svc:9000/minio/health/ready >/dev/null 2>&1; do
+              until mc alias set local http://minio.openshift-logging.svc:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"; do
                 echo "waiting minio..."
                 sleep 3
               done
-              mc alias set local http://minio.openshift-logging.svc:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"
               mc mb -p local/loki || true
               mc ls local/loki
           securityContext:
