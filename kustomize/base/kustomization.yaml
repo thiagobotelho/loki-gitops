@@ -6,6 +6,7 @@ resources:
   - namespace-openshift-operators-redhat.yaml
   - operatorgroup.yaml
   - subscription.yaml
+  - logging/operator.yaml
 
   - minio/pvc.yaml
   - minio/deployment.yaml
@@ -13,3 +14,4 @@ resources:
   - minio/bucket-job.yaml
 
   - loki/lokistack.yaml
+  - logging/forwarder.yaml

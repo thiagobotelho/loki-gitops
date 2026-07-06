@@ -18,3 +18,9 @@ spec:
         effectiveDate: "2024-01-01"
   tenants:
     mode: openshift-logging
+    openshift:
+      adminGroups:
+        - system:cluster-admins
+        - cluster-admin
+        - dedicated-admin
+        - system:serviceaccount:grafana:grafana-loki
