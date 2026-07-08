@@ -8,6 +8,7 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   size: 1x.demo
+  storageClassName: crc-csi-hostpath-provisioner
   storage:
     secret:
       name: loki-s3
