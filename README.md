@@ -59,9 +59,30 @@ oc -n openshift-logging create secret generic loki-s3 \
   --from-literal=endpoint=http://minio.openshift-logging.svc:9000 \
   --from-literal=region=us-east-1
 
-oc apply -k kustomize/overlays/crc
+oc apply -k overlays/desenvolvimento
 ```
 
 Os Secrets não são versionados. Para ambientes compartilhados, prefira
 External Secrets ou Sealed Secrets e rotacione qualquer credencial que já
 tenha sido publicada no histórico Git.
+
+## Ambientes e validação
+
+```bash
+oc kustomize overlays/desenvolvimento >/tmp/loki-dev.yaml
+oc kustomize overlays/aceite >/tmp/loki-aceite.yaml
+oc kustomize overlays/producao >/tmp/loki-prod.yaml
+oc apply --dry-run=client -k overlays/desenvolvimento
+```
+
+A estrutura primária é `base/` e `overlays/{desenvolvimento,aceite,producao}`.
+O diretório `kustomize/` é legado e mantido temporariamente para compatibilidade.
+`storageClassName` foi removido da base para evitar dependência do CRC; use a
+StorageClass padrão ou patch por overlay. Veja `docs/AMBIENTES.md`.
+
+## Automatizações preservadas e ajustadas
+
+- Mantido `.github/workflows/validate.yml`, renderizando todos os
+  `kustomization.yaml` e executando `yamllint`.
+- Adicionados overlays padronizados para `desenvolvimento`, `aceite` e
+  `producao`.
