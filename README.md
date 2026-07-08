@@ -6,6 +6,21 @@ Este projeto segue modelo declarativo utilizando Kustomize, permitindo integraç
 
 ---
 
+
+## Arquitetura
+
+```mermaid
+flowchart LR
+    Pods[Pods/OpenShift logs] --> CLF[ClusterLogForwarder]
+    CLF --> Loki[LokiStack]
+    Loki --> MinIO[(MinIO/S3 local)]
+    Grafana[Grafana] --> Loki
+    Tempo[Tempo] -. trace_id .-> Loki
+```
+
+O Loki recebe logs do OpenShift, armazena em backend S3 compatível no laboratório
+e é consultado pelo Grafana para logs e correlação logs-traces.
+
 ## 🎯 Objetivo
 
 Provisionar:
@@ -16,19 +31,17 @@ Provisionar:
 
 ---
 
-## 🏗 Estrutura
+## Estrutura
 
-```bash
+```text
 loki-gitops/
-└── kustomize/
 ├── base/
-│ ├── operatorgroup.yaml
-│ ├── subscription.yaml
-│ ├── lokistack.yaml
-│ └── kustomization.yaml
-└── overlays/
-└── crc/
-└── kustomization.yaml
+├── overlays/
+│   ├── desenvolvimento/
+│   ├── aceite/
+│   └── producao/
+├── docs/
+└── README.md
 ```
 
 ---
@@ -76,13 +89,6 @@ oc apply --dry-run=client -k overlays/desenvolvimento
 ```
 
 A estrutura primária é `base/` e `overlays/{desenvolvimento,aceite,producao}`.
-O diretório `kustomize/` é legado e mantido temporariamente para compatibilidade.
-`storageClassName` foi removido da base para evitar dependência do CRC; use a
-StorageClass padrão ou patch por overlay. Veja `docs/AMBIENTES.md`.
-
-## Automatizações preservadas e ajustadas
-
-- Mantido `.github/workflows/validate.yml`, renderizando todos os
-  `kustomization.yaml` e executando `yamllint`.
-- Adicionados overlays padronizados para `desenvolvimento`, `aceite` e
-  `producao`.
+`storageClassName` não é fixado na base; o overlay `desenvolvimento` mantém a
+classe do CRC para não alterar PVCs já criados no laboratório. Veja
+`docs/AMBIENTES.md`.

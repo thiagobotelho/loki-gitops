@@ -24,7 +24,3 @@ Decisões:
 
 - `storageClassName` não é fixado na base; use a default do cluster ou patch por overlay.
 - O datasource Grafana deve apontar para o gateway Loki com token de ServiceAccount.
-
-Automação preservada:
-
-- `.github/workflows/validate.yml`: renderiza todos os Kustomizations e executa `yamllint`.
