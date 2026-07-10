@@ -24,3 +24,7 @@ Decisões:
 
 - `storageClassName` não é fixado na base; use a default do cluster ou patch por overlay.
 - O datasource Grafana deve apontar para o gateway Loki com token de ServiceAccount.
+- O `UIPlugin/logging` habilita `Observe > Logs` no Console do OpenShift e
+  aponta para `openshift-logging/loki`.
+- Network Observability não reutiliza esse LokiStack; flows usam LokiStack
+  dedicado com `tenants.mode: openshift-network`.

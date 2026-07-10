@@ -14,12 +14,19 @@ flowchart LR
     Pods[Pods/OpenShift logs] --> CLF[ClusterLogForwarder]
     CLF --> Loki[LokiStack]
     Loki --> MinIO[(MinIO/S3 local)]
+    Console[OpenShift Console] --> UI[UIPlugin logging]
+    UI --> Loki
     Grafana[Grafana] --> Loki
     Tempo[Tempo] -. trace_id .-> Loki
 ```
 
 O Loki recebe logs do OpenShift, armazena em backend S3 compatível no laboratório
-e é consultado pelo Grafana para logs e correlação logs-traces.
+e é consultado pelo Grafana para logs e correlação logs-traces. O recurso
+`UIPlugin/logging` habilita o menu `Observe > Logs` no Console do OpenShift.
+
+Este LokiStack é para logs de aplicação/infra/audit. Fluxos de rede do Network
+Observability usam um LokiStack dedicado no repositório
+`network-observability-gitops`, com tenant `openshift-network`.
 
 ## 🎯 Objetivo
 
@@ -27,6 +34,8 @@ Provisionar:
 
 - Loki Operator (via OLM)
 - LokiStack
+- OpenShift Logging Operator e `ClusterLogForwarder`
+- `UIPlugin/logging` para o menu `Observe > Logs`
 - Estrutura base para regras de alerta e gravação
 
 ---
@@ -78,6 +87,16 @@ oc apply -k overlays/desenvolvimento
 Os Secrets não são versionados. Para ambientes compartilhados, prefira
 External Secrets ou Sealed Secrets e rotacione qualquer credencial que já
 tenha sido publicada no histórico Git.
+
+Após a sincronização, valide o plugin de logs:
+
+```bash
+oc get uiplugin logging
+oc get consoleplugin | grep logging
+```
+
+No Console do OpenShift, faça refresh ou logout/login e acesse
+`Observe > Logs`.
 
 ## Ambientes e validação
 

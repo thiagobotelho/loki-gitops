@@ -15,3 +15,4 @@ resources:
 
   - loki/lokistack.yaml
   - logging/forwarder.yaml
+  - logging/uiplugin.yaml

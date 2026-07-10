@@ -1,0 +1,16 @@
+apiVersion: observability.openshift.io/v1alpha1
+kind: UIPlugin
+metadata:
+  name: logging
+  annotations:
+    argocd.argoproj.io/sync-wave: "35"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  type: Logging
+  logging:
+    lokiStack:
+      name: loki
+      namespace: openshift-logging
+    logsLimit: 50
+    timeout: 30s
+    schema: viaq
