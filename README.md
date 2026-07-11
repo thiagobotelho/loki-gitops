@@ -1,10 +1,10 @@
 # loki-gitops
 
-Repositório GitOps responsável pela instalação do **Loki Operator (Red Hat)** e provisionamento do **LokiStack** em ambiente OpenShift 4.x.
+Repositório GitOps responsável pela instalação do **Loki Operator (Red Hat)** e
+provisionamento do **LokiStack** em ambiente OpenShift 4.x.
 
-Este projeto segue modelo declarativo utilizando Kustomize, permitindo integração nativa com Argo CD / OpenShift GitOps.
-
----
+Este projeto segue modelo declarativo com Kustomize e integração nativa com
+Argo CD/OpenShift GitOps.
 
 
 ## Arquitetura
@@ -28,7 +28,7 @@ Este LokiStack é para logs de aplicação/infra/audit. Fluxos de rede do Networ
 Observability usam um LokiStack dedicado no repositório
 `network-observability-gitops`, com tenant `openshift-network`.
 
-## 🎯 Objetivo
+## Objetivo
 
 Provisionar:
 
@@ -37,8 +37,6 @@ Provisionar:
 - OpenShift Logging Operator e `ClusterLogForwarder`
 - `UIPlugin/logging` para o menu `Observe > Logs`
 - Estrutura base para regras de alerta e gravação
-
----
 
 ## Estrutura
 
@@ -53,9 +51,7 @@ loki-gitops/
 └── README.md
 ```
 
----
-
-## 📦 Operador Utilizado
+## Operadores
 
 - Package: loki-operator
 - Source: redhat-operators
@@ -64,7 +60,7 @@ loki-gitops/
 
 ---
 
-## 🚀 Deploy Manual
+## Deploy
 
 ```bash
 export MINIO_ROOT_USER=minio
@@ -93,10 +89,42 @@ Após a sincronização, valide o plugin de logs:
 ```bash
 oc get uiplugin logging
 oc get consoleplugin | grep logging
+oc get consoles.operator.openshift.io cluster -o jsonpath='{.spec.plugins}{"\n"}'
 ```
 
 No Console do OpenShift, faça refresh ou logout/login e acesse
 `Observe > Logs`.
+
+## Diagnóstico do menu Observe > Logs
+
+O plugin do Console carrega um `plugin-manifest.json` e uma configuração JSON.
+Se o navegador receber HTML nesses endpoints, a UI pode exibir erro de parsing
+JSON. Valide primeiro os objetos do cluster:
+
+```bash
+oc get uiplugin logging
+oc get consoleplugin logging-view-plugin
+oc get consoles.operator.openshift.io cluster -o jsonpath='{.spec.plugins}{"\n"}'
+```
+
+Depois valide o Loki gateway usado pela UI. Use um token válido no shell, sem
+registrá-lo em arquivo:
+
+```bash
+TOKEN="$(oc whoami --show-token)"
+oc -n openshift-logging run loki-labels-check --rm -i --restart=Never \
+  --image=curlimages/curl:8.10.1 -- \
+  curl -ksS -H "Authorization: Bearer ${TOKEN}" \
+  https://loki-gateway-http.openshift-logging.svc.cluster.local:8080/api/logs/v1/application/loki/api/v1/labels
+```
+
+Se os objetos e o gateway estiverem saudáveis, faça hard refresh no navegador.
+Quando o Console mantiver bundle antigo em cache, reinicie apenas o Console:
+
+```bash
+oc -n openshift-console rollout restart deployment/console
+oc -n openshift-console rollout status deployment/console --timeout=5m
+```
 
 ## Ambientes e validação
 
