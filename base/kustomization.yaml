@@ -14,5 +14,6 @@ resources:
   - minio/bucket-job.yaml
 
   - loki/lokistack.yaml
+  - loki/rbac.yaml
   - logging/forwarder.yaml
   - logging/uiplugin.yaml
