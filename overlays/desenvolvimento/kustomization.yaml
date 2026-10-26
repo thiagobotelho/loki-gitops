@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - ../../base
+  - crc-image-builds.yaml
 
 labels:
   - pairs:
@@ -34,3 +35,11 @@ patches:
       - op: add
         path: /spec/storageClassName
         value: crc-csi-hostpath-provisioner
+
+images:
+  - name: quay.io/minio/minio
+    newName: image-registry.openshift-image-registry.svc:5000/openshift-logging/minio-crc
+    newTag: RELEASE.2025-09-07T16-13-09Z
+  - name: quay.io/minio/mc
+    newName: image-registry.openshift-image-registry.svc:5000/openshift-logging/mc-crc
+    newTag: RELEASE.2025-08-13T08-35-41Z
