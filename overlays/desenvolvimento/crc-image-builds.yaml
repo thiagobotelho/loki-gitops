@@ -46,8 +46,7 @@ spec:
       '
   strategy:
     type: Docker
-    dockerStrategy:
-      noCache: false
+    dockerStrategy: {}
   output:
     to:
       kind: ImageStreamTag
@@ -61,7 +60,6 @@ spec:
       memory: 4Gi
   successfulBuildsHistoryLimit: 1
   failedBuildsHistoryLimit: 1
-  triggers: []
 ---
 apiVersion: image.openshift.io/v1
 kind: ImageStream
@@ -111,8 +109,7 @@ spec:
       '
   strategy:
     type: Docker
-    dockerStrategy:
-      noCache: false
+    dockerStrategy: {}
   output:
     to:
       kind: ImageStreamTag
@@ -126,4 +123,3 @@ spec:
       memory: 4Gi
   successfulBuildsHistoryLimit: 1
   failedBuildsHistoryLimit: 1
-  triggers: []
