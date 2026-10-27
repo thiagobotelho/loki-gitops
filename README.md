@@ -137,5 +137,9 @@ oc apply --dry-run=client -k overlays/desenvolvimento
 
 A estrutura primária é `base/` e `overlays/{desenvolvimento,aceite,producao}`.
 `storageClassName` não é fixado na base; o overlay `desenvolvimento` mantém a
-classe do CRC para não alterar PVCs já criados no laboratório. Veja
+classe definida para desenvolvimento; revise compatibilidade e migração antes de alterar PVCs existentes. Veja
 `docs/AMBIENTES.md`.
+
+## Manual de operação
+
+Consulte [docs/OPERACAO.md](docs/OPERACAO.md) para os procedimentos de configuração, verificação e manutenção.
