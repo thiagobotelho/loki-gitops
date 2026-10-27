@@ -32,3 +32,11 @@ Decisões:
 ## Classe de armazenamento
 
 LokiStack exige storageClassName. O overlay desenvolvimento seleciona a classe do OpenShift Local crc-csi-hostpath-provisioner. Confira sua existência antes de aplicar; caso a distribuição use outro provisionador, altere o patch. Em aceite e produção, substitua classe-rwo-exemplo por uma StorageClass RWO existente, com capacidade e recuperação definidas. A classe de dados de ingesters/queriers não substitui o backend S3 dos blocos.
+
+## Bootstrap de imagens no desenvolvimento
+
+Somente o perfil CRC inclui o hook Sync `crc-minio-images`. Consulte
+[imagens automáticas](../README.md#imagens-automáticas-no-crc) para ordem,
+permissões, diagnóstico e atualização de versões. A sincronização completa
+pelo Argo CD é o caminho de instalação desse perfil; aplicar Kustomize
+diretamente não reproduz a execução dos hooks.

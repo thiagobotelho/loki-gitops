@@ -1,0 +1,185 @@
+# Orquestra somente os builds locais necessários ao perfil CRC.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: crc-minio-images
+  namespace: openshift-logging
+  annotations:
+    argocd.argoproj.io/sync-wave: '4'
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: crc-minio-images
+  namespace: openshift-logging
+  annotations:
+    argocd.argoproj.io/sync-wave: '4'
+rules:
+- apiGroups:
+  - image.openshift.io
+  resources:
+  - imagestreamtags
+  resourceNames:
+  - minio-crc:RELEASE.2025-09-07T16-13-09Z
+  - mc-crc:RELEASE.2025-08-13T08-35-41Z
+  verbs:
+  - get
+- apiGroups:
+  - build.openshift.io
+  resources:
+  - buildconfigs
+  resourceNames:
+  - minio-crc
+  - mc-crc
+  verbs:
+  - get
+- apiGroups:
+  - build.openshift.io
+  resources:
+  - buildconfigs/instantiate
+  resourceNames:
+  - minio-crc
+  - mc-crc
+  verbs:
+  - create
+- apiGroups:
+  - build.openshift.io
+  resources:
+  - builds
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: crc-minio-images
+  namespace: openshift-logging
+  annotations:
+    argocd.argoproj.io/sync-wave: '4'
+subjects:
+- kind: ServiceAccount
+  name: crc-minio-images
+  namespace: openshift-logging
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: crc-minio-images
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: crc-minio-images
+  namespace: openshift-logging
+  annotations:
+    argocd.argoproj.io/sync-wave: '5'
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 2100
+  template:
+    spec:
+      serviceAccountName: crc-minio-images
+      restartPolicy: Never
+      containers:
+      - name: orquestrar
+        image: quay.io/openshift/origin-cli@sha256:64ecbe0b472c5a311ce0a5f1606fdac1842aeaf1523c69e02ff7d15cf43cb5b9
+        imagePullPolicy: IfNotPresent
+        command:
+        - /bin/sh
+        - -ec
+        args:
+        - |
+          # Uma única operação Sync orquestra os builds; o Job não lê Secrets de usuários.
+          ocn() {
+            oc --request-timeout=15s --cache-dir=/tmp/oc-cache -n "$POD_NAMESPACE" "$@"
+          }
+          ensure_image() {
+            NAME="$1"
+            TAG="$2"
+            IMAGE="$(ocn get imagestreamtag "$TAG" --ignore-not-found -o name)"
+            if [ -n "$IMAGE" ]; then
+              echo "Imagem já disponível: $TAG"
+              return 0
+            fi
+
+            VERSION="$(ocn get buildconfig "$NAME" -o jsonpath='{.status.lastVersion}')"
+            VERSION="${VERSION:-0}"
+            case "$VERSION" in *[!0-9]*) echo "Versão de build inválida" >&2; return 1 ;; esac
+            BUILD=
+            if [ "$VERSION" -gt 0 ]; then
+              CANDIDATE="$NAME-$VERSION"
+              PHASE="$(ocn get build "$CANDIDATE" --ignore-not-found -o jsonpath='{.status.phase}')"
+              case "$PHASE" in
+                New|Pending|Running) BUILD="$CANDIDATE" ;;
+                ''|Complete|Failed|Error|Cancelled) ;;
+                *) echo "Estado de build desconhecido: $PHASE" >&2; return 1 ;;
+              esac
+            fi
+            if [ -z "$BUILD" ]; then
+              BUILD="$(ocn start-build "$NAME" -o jsonpath='{.metadata.name}')"
+              [ -n "$BUILD" ] || { echo "Build não retornou nome" >&2; return 1; }
+              echo "Build iniciado: $BUILD"
+            else
+              echo "Acompanhando build existente: $BUILD"
+            fi
+
+            ATTEMPT=0
+            while [ "$ATTEMPT" -lt "$MAX_ATTEMPTS" ]; do
+              ATTEMPT=$((ATTEMPT + 1))
+              PHASE="$(ocn get build "$BUILD" -o jsonpath='{.status.phase}')"
+              case "$PHASE" in
+                Complete)
+                  IMAGE="$(ocn get imagestreamtag "$TAG" --ignore-not-found -o name)"
+                  if [ -n "$IMAGE" ]; then
+                    echo "Build concluído e imagem publicada: $TAG"
+                    return 0
+                  fi
+                  ;;
+                New|Pending|Running) ;;
+                Failed|Error|Cancelled)
+                  echo "Build $BUILD terminou em $PHASE; consulte seus logs" >&2
+                  return 1
+                  ;;
+                *) echo "Estado de build desconhecido: $PHASE" >&2; return 1 ;;
+              esac
+              sleep "$POLL_SECONDS"
+            done
+            echo "Tempo esgotado aguardando $BUILD e $TAG" >&2
+            return 1
+          }
+          ensure_image minio-crc minio-crc:RELEASE.2025-09-07T16-13-09Z
+          ensure_image mc-crc mc-crc:RELEASE.2025-08-13T08-35-41Z
+        env:
+        - name: HOME
+          value: /tmp
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: MAX_ATTEMPTS
+          value: '180'
+        - name: POLL_SECONDS
+          value: '5'
+        resources:
+          requests:
+            cpu: 25m
+            memory: 96Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          capabilities:
+            drop:
+            - ALL
+          seccompProfile:
+            type: RuntimeDefault
+        volumeMounts:
+        - name: temporario
+          mountPath: /tmp
+      volumes:
+      - name: temporario
+        emptyDir: {}
