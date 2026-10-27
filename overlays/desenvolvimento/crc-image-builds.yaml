@@ -2,6 +2,7 @@ apiVersion: image.openshift.io/v1
 kind: ImageStream
 metadata:
   name: minio-crc
+  # Namespace deste objeto; não confundir com seleção de namespaces de origem.
   namespace: openshift-logging
   annotations:
     argocd.argoproj.io/sync-wave: '4'
@@ -51,6 +52,7 @@ spec:
     to:
       kind: ImageStreamTag
       name: minio-crc:RELEASE.2025-09-07T16-13-09Z
+  # Recursos ou dependências desta seção; avaliar seu escopo antes de alterar.
   resources:
     requests:
       cpu: 500m

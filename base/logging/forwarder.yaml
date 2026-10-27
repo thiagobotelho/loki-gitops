@@ -2,6 +2,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: collector
+  # Namespace deste objeto; não confundir com seleção de namespaces de origem.
   namespace: openshift-logging
   annotations:
     argocd.argoproj.io/sync-wave: "4"
@@ -12,10 +13,12 @@ metadata:
   name: collect-application-logs
   annotations:
     argocd.argoproj.io/sync-wave: "4"
+# Referência de permissão; este vínculo não cria identidades no provedor.
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: collect-application-logs
+# Identidades que recebem as permissões declaradas pelo papel referenciado.
 subjects:
   - kind: ServiceAccount
     name: collector
@@ -57,6 +60,7 @@ spec:
         authentication:
           token:
             from: serviceAccount
+      # TLS define transporte e confiança; não desabilitar validação para contornar erros.
       tls:
         ca:
           configMapName: loki-gateway-ca-bundle

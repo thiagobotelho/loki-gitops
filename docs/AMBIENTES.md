@@ -28,3 +28,7 @@ Decisões:
   aponta para `openshift-logging/loki`.
 - Network Observability não reutiliza esse LokiStack; flows usam LokiStack
   dedicado com `tenants.mode: openshift-network`.
+
+## Classe de armazenamento
+
+LokiStack exige storageClassName. O overlay desenvolvimento seleciona a classe do OpenShift Local crc-csi-hostpath-provisioner. Confira sua existência antes de aplicar; caso a distribuição use outro provisionador, altere o patch. Em aceite e produção, substitua classe-rwo-exemplo por uma StorageClass RWO existente, com capacidade e recuperação definidas. A classe de dados de ingesters/queriers não substitui o backend S3 dos blocos.

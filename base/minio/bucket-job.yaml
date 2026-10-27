@@ -2,6 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: minio-create-bucket
+  # Namespace deste objeto; não confundir com seleção de namespaces de origem.
   namespace: openshift-logging
   annotations:
     argocd.argoproj.io/sync-wave: "8"
@@ -40,6 +41,7 @@ spec:
               done
               mc mb -p local/loki || true
               mc ls local/loki
+          # Restringe privilégios do processo; conferir compatibilidade com a SCC.
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
