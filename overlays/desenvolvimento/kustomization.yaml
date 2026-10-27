@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
 - ../../base
 - crc-image-builds.yaml
+- crc-image-bootstrap.yaml
 labels:
 - pairs:
     app.kubernetes.io/name: loki
@@ -30,6 +31,26 @@ patches:
     group: loki.grafana.com
     kind: LokiStack
   patch: "- op: replace\n  path: /spec/storageClassName\n  value: crc-csi-hostpath-provisioner"
+- target:
+    group: apps
+    version: v1
+    kind: Deployment
+    name: minio
+    namespace: openshift-logging
+  patch: |-
+    - op: replace
+      path: /metadata/annotations/argocd.argoproj.io~1sync-wave
+      value: "6"
+- target:
+    version: v1
+    kind: PersistentVolumeClaim
+    name: minio-data
+    namespace: openshift-logging
+  patch: |-
+    - op: replace
+      path: /metadata/annotations/argocd.argoproj.io~1sync-wave
+      value: "6"
+
 images:
 - name: quay.io/minio/minio
   newName: image-registry.openshift-image-registry.svc:5000/openshift-logging/minio-crc
