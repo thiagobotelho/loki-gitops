@@ -2,14 +2,17 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: minio
+  # Namespace deste objeto; não confundir com seleção de namespaces de origem.
   namespace: openshift-logging
   annotations:
     argocd.argoproj.io/sync-wave: "5"
 spec:
+  # Número de instâncias; réplicas isoladamente não garantem alta disponibilidade.
   replicas: 1
   strategy:
     type: Recreate
     rollingUpdate: null
+  # Seletores precisam corresponder aos labels dos recursos de destino.
   selector:
     matchLabels:
       app: minio
@@ -39,12 +42,14 @@ spec:
               containerPort: 9000
             - name: console
               containerPort: 9001
+          # Prontidão controla recebimento de tráfego, sem provar integrações externas.
           readinessProbe:
             httpGet:
               path: /minio/health/ready
               port: api
             initialDelaySeconds: 10
             periodSeconds: 10
+          # Falha desta sonda pode reiniciar o container; evite depender de serviços externos.
           livenessProbe:
             httpGet:
               path: /minio/health/live
@@ -58,6 +63,7 @@ spec:
             limits:
               cpu: "1"
               memory: 1Gi
+          # Restringe privilégios do processo; conferir compatibilidade com a SCC.
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -70,5 +76,6 @@ spec:
               mountPath: /data
       volumes:
         - name: data
+          # Dados persistentes exigem capacidade, classe de armazenamento e backup.
           persistentVolumeClaim:
             claimName: minio-data

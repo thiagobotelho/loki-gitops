@@ -143,3 +143,7 @@ classe definida para desenvolvimento; revise compatibilidade e migração antes 
 ## Manual de operação
 
 Consulte [docs/OPERACAO.md](docs/OPERACAO.md) para os procedimentos de configuração, verificação e manutenção.
+
+## Aprender a configuração
+
+Consulte o [guia comentado](docs/APRENDIZADO.md) para entender componentes, escolhas, testes positivos/negativos e reversão.

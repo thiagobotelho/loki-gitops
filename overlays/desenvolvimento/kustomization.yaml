@@ -1,45 +1,39 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
 resources:
-  - ../../base
-  - crc-image-builds.yaml
-
+- ../../base
+- crc-image-builds.yaml
 labels:
-  - pairs:
-      app.kubernetes.io/name: loki
-      app.kubernetes.io/instance: loki-desenvolvimento
-      app.kubernetes.io/component: logging
-      app.kubernetes.io/part-of: observability
-      app.kubernetes.io/managed-by: argocd
-      app.kubernetes.io/environment: desenvolvimento
-    includeSelectors: false
-
+- pairs:
+    app.kubernetes.io/name: loki
+    app.kubernetes.io/instance: loki-desenvolvimento
+    app.kubernetes.io/component: logging
+    app.kubernetes.io/part-of: observability
+    app.kubernetes.io/managed-by: argocd
+    app.kubernetes.io/environment: desenvolvimento
+  includeSelectors: false
 patches:
-  - target:
-      group: loki.grafana.com
-      version: v1
-      kind: LokiStack
-      name: loki
-      namespace: openshift-logging
-    patch: |-
-      - op: add
-        path: /spec/storageClassName
-        value: crc-csi-hostpath-provisioner
-  - target:
-      version: v1
-      kind: PersistentVolumeClaim
-      name: minio-data
-      namespace: openshift-logging
-    patch: |-
-      - op: add
-        path: /spec/storageClassName
-        value: crc-csi-hostpath-provisioner
-
+- target:
+    group: loki.grafana.com
+    version: v1
+    kind: LokiStack
+    name: loki
+    namespace: openshift-logging
+  patch: "- op: add\n  path: /spec/storageClassName\n  value: crc-csi-hostpath-provisioner"
+- target:
+    version: v1
+    kind: PersistentVolumeClaim
+    name: minio-data
+    namespace: openshift-logging
+  patch: "- op: add\n  path: /spec/storageClassName\n  value: crc-csi-hostpath-provisioner"
+- target:
+    group: loki.grafana.com
+    kind: LokiStack
+  patch: "- op: replace\n  path: /spec/storageClassName\n  value: crc-csi-hostpath-provisioner"
 images:
-  - name: quay.io/minio/minio
-    newName: image-registry.openshift-image-registry.svc:5000/openshift-logging/minio-crc
-    newTag: RELEASE.2025-09-07T16-13-09Z
-  - name: quay.io/minio/mc
-    newName: image-registry.openshift-image-registry.svc:5000/openshift-logging/mc-crc
-    newTag: RELEASE.2025-08-13T08-35-41Z
+- name: quay.io/minio/minio
+  newName: image-registry.openshift-image-registry.svc:5000/openshift-logging/minio-crc
+  newTag: RELEASE.2025-09-07T16-13-09Z
+- name: quay.io/minio/mc
+  newName: image-registry.openshift-image-registry.svc:5000/openshift-logging/mc-crc
+  newTag: RELEASE.2025-08-13T08-35-41Z
