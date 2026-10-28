@@ -1,0 +1,31 @@
+# Coleta somente do tipo audit e escrita no tenant audit do Loki.
+# O input do forwarder restringe a origem a OVN; o filtro retém mesh-lab.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: collector-crc-collect-audit-logs
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: collect-audit-logs
+subjects:
+  - kind: ServiceAccount
+    name: collector
+    namespace: openshift-logging
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: collector-crc-write-audit-logs
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-logging-write-audit-logs
+subjects:
+  - kind: ServiceAccount
+    name: collector
+    namespace: openshift-logging
