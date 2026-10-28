@@ -209,3 +209,7 @@ Consulte [docs/OPERACAO.md](docs/OPERACAO.md) para os procedimentos de configura
 ## Aprender a configuração
 
 Consulte o [guia comentado](docs/APRENDIZADO.md) para entender componentes, escolhas, testes positivos/negativos e reversão.
+
+## Auditoria Allow/Drop
+
+Consulte o [guia de auditoria OVN](docs/AUDITORIA-OVN.md) para verificar decisões na interface do Console.

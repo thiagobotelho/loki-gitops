@@ -1,0 +1,30 @@
+# O input explícito evita coletar kubeAPI, openshiftAPI e auditd.
+- op: add
+  path: /spec/inputs
+  value:
+    - name: ovn-audit
+      type: audit
+      audit:
+        sources:
+          - ovn
+- op: add
+  path: /spec/filters
+  value:
+    - name: somente-mesh-lab
+      type: drop
+      drop:
+        - test:
+            - field: .message
+              # O nome da ACL inclui namespace e, quando aplicável, política.
+              notMatches: 'name="NP:mesh-lab:'
+# Acrescenta pipeline; preserva o encaminhamento de application existente.
+- op: add
+  path: /spec/pipelines/-
+  value:
+    name: ovn-audit-mesh-lab
+    inputRefs:
+      - ovn-audit
+    filterRefs:
+      - somente-mesh-lab
+    outputRefs:
+      - default-lokistack

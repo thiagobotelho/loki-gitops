@@ -4,6 +4,7 @@ resources:
 - ../../base
 - crc-image-builds.yaml
 - crc-image-bootstrap.yaml
+- ovn-audit-rbac.yaml
 labels:
 - pairs:
     app.kubernetes.io/name: loki
@@ -14,6 +15,13 @@ labels:
     app.kubernetes.io/environment: desenvolvimento
   includeSelectors: false
 patches:
+- path: ovn-audit-patch.yaml
+  target:
+    group: observability.openshift.io
+    version: v1
+    kind: ClusterLogForwarder
+    name: instance
+    namespace: openshift-logging
 - target:
     group: loki.grafana.com
     version: v1
