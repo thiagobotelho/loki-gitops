@@ -213,3 +213,7 @@ Consulte o [guia comentado](docs/APRENDIZADO.md) para entender componentes, esco
 ## Auditoria Allow/Drop
 
 Consulte o [guia de auditoria OVN](docs/AUDITORIA-OVN.md) para verificar decisões na interface do Console.
+
+## Diagnóstico integrado de rede e mesh
+
+Consulte o [guia de observabilidade do mesh](https://github.com/thiagobotelho/service-mesh-gitops/blob/main/docs/OBSERVABILIDADE.md) para correlacionar NetworkPolicy, logs de proxies, mTLS, autorização HTTP e traces, com as fontes de dados corretas.
