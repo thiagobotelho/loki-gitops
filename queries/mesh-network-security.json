@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "namespaceVariable": "namespace",
+  "queries": {
+    "mesh_authorization_denied": "{log_type=\"application\"} | kubernetes_namespace_name=~\"$namespace\" | kubernetes_container_name=\"istio-proxy\" | json payload=\"message\" | line_format \"{{.payload}}\" | json | __error__=\"\" | response_code_details=~\"rbac_access_denied.*\"",
+    "mesh_mtls_or_listener_rejected": "{log_type=\"application\"} | kubernetes_namespace_name=~\"$namespace\" | kubernetes_container_name=\"istio-proxy\" | json payload=\"message\" | line_format \"{{.payload}}\" | json | __error__=\"\" | response_code_details=\"filter_chain_not_found\"",
+    "mesh_http_5xx": "{log_type=\"application\"} | kubernetes_namespace_name=~\"$namespace\" | kubernetes_container_name=\"istio-proxy\" | json payload=\"message\" | line_format \"{{.payload}}\" | json | __error__=\"\" | response_code=~\"5..\"",
+    "ovn_networkpolicy_drop": "{log_type=\"audit\"} |= \"NP:\" |~ \"NP:(${namespace:regex}):\" |= \"verdict=drop\"",
+    "ovn_networkpolicy_allow": "{log_type=\"audit\"} |= \"NP:\" |~ \"NP:(${namespace:regex}):\" |= \"verdict=allow\""
+  }
+}

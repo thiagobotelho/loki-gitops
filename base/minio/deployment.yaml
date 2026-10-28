@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: minio
-  # Namespace deste objeto; não confundir com seleção de namespaces de origem.
   namespace: openshift-logging
   annotations:
     argocd.argoproj.io/sync-wave: "5"

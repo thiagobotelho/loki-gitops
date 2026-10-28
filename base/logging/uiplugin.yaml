@@ -10,7 +10,6 @@ spec:
   logging:
     lokiStack:
       name: loki
-      # Namespace deste objeto; não confundir com seleção de namespaces de origem.
       namespace: openshift-logging
     logsLimit: 50
     timeout: 30s
