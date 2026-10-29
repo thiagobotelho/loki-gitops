@@ -117,7 +117,8 @@ spec:
               esac
             fi
             if [ -z "$BUILD" ]; then
-              BUILD="$(ocn start-build "$NAME" -o jsonpath='{.metadata.name}')"
+              BUILD="$(ocn start-build "$NAME" -o name)"
+              BUILD="${BUILD##*/}"
               [ -n "$BUILD" ] || { echo "Build não retornou nome" >&2; return 1; }
               echo "Build iniciado: $BUILD"
             else
